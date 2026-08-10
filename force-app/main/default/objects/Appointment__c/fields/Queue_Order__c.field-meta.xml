@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Queue_Order__c</fullName>
+    <label>Queue Order</label>
+    <type>Number</type>
+    <precision>18</precision>
+    <scale>0</scale>
+    <required>true</required>
+    <defaultValue>0</defaultValue>
+    <description>Determines live serving order within a doctor's day. Set from slot index at booking time; pushed to the end of the active queue when a patient is skipped.</description>
+</CustomField>
