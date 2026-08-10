@@ -3,11 +3,14 @@
  * doctor's day and creating a new appointment. Queue_Order__c is seeded from
  * the slot's position in the day (not insertion order), so appointments
  * booked out of time order still serve in time order until something moves.
+ *
+ * Slot times cross the @AuraEnabled boundary as "HH:mm" strings, not Apex
+ * Time -- see TimeUtils for why.
  */
 public with sharing class BookingService {
     public class SlotOption {
         @AuraEnabled
-        public Time slotTime;
+        public String slotTime;
         @AuraEnabled
         public Boolean isAvailable;
     }
@@ -35,7 +38,7 @@ public with sharing class BookingService {
         Time cursor = doc.Start_Time__c;
         while (cursor < doc.End_Time__c) {
             SlotOption opt = new SlotOption();
-            opt.slotTime = cursor;
+            opt.slotTime = TimeUtils.formatHHmm(cursor);
             opt.isAvailable = !takenSlots.contains(cursor);
             options.add(opt);
             cursor = cursor.addMilliseconds(stepMs);
@@ -46,13 +49,18 @@ public with sharing class BookingService {
     public static Id bookAppointment(
         Id doctorId,
         Date apptDate,
-        Time slotTime,
+        String slotTimeStr,
         String patientName,
         String patientPhone
     ) {
         if (String.isBlank(patientName) || String.isBlank(patientPhone)) {
             throw new QueueService.QueueException('Patient name and phone are required.');
         }
+        if (String.isBlank(slotTimeStr)) {
+            throw new QueueService.QueueException('A slot time is required.');
+        }
+
+        Time slotTime = TimeUtils.parseHHmm(slotTimeStr);
 
         List<Appointment__c> existing = [
             SELECT Id

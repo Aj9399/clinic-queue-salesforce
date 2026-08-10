@@ -31,7 +31,7 @@ public with sharing class QueueService {
         @AuraEnabled
         public String status;
         @AuraEnabled
-        public Time slotTime;
+        public String slotTime;
         @AuraEnabled
         public Decimal queueOrder;
         @AuraEnabled
@@ -61,7 +61,7 @@ public with sharing class QueueService {
             item.patientName = a.Patient_Name__c;
             item.patientPhone = a.Patient_Phone__c;
             item.status = a.Status__c;
-            item.slotTime = a.Slot_Time__c;
+            item.slotTime = TimeUtils.formatHHmm(a.Slot_Time__c);
             item.queueOrder = a.Queue_Order__c;
             item.checkedInAt = a.Checked_In_At__c;
             item.checkedOutAt = a.Checked_Out_At__c;

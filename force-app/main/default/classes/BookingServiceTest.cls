@@ -31,7 +31,7 @@ private class BookingServiceTest {
 
         Boolean foundTakenSlot = false;
         for (BookingService.SlotOption opt : slots) {
-            if (opt.slotTime == Time.newInstance(17, 15, 0, 0)) {
+            if (opt.slotTime == '17:15') {
                 foundTakenSlot = true;
                 System.assertEquals(false, opt.isAvailable);
             }
@@ -48,7 +48,7 @@ private class BookingServiceTest {
         Id apptId = BookingService.bookAppointment(
             doc.Id,
             apptDate,
-            Time.newInstance(17, 30, 0, 0),
+            '17:30',
             'Jane Doe',
             '9876543210'
         );
@@ -68,7 +68,7 @@ private class BookingServiceTest {
         Test.startTest();
         Boolean threw = false;
         try {
-            BookingService.bookAppointment(doc.Id, apptDate, Time.newInstance(17, 0, 0, 0), 'John Doe', '9998887777');
+            BookingService.bookAppointment(doc.Id, apptDate, '17:00', 'John Doe', '9998887777');
         } catch (QueueService.QueueException e) {
             threw = true;
         }
@@ -85,7 +85,7 @@ private class BookingServiceTest {
         Test.startTest();
         Boolean threw = false;
         try {
-            BookingService.bookAppointment(doc.Id, apptDate, Time.newInstance(17, 0, 0, 0), '', '9998887777');
+            BookingService.bookAppointment(doc.Id, apptDate, '17:00', '', '9998887777');
         } catch (QueueService.QueueException e) {
             threw = true;
         }

@@ -17,7 +17,7 @@ public with sharing class BookingController {
     public static Id bookAppointment(
         Id doctorId,
         Date apptDate,
-        Time slotTime,
+        String slotTime,
         String patientName,
         String patientPhone
     ) {

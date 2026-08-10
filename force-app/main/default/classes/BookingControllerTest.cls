@@ -33,7 +33,7 @@ private class BookingControllerTest {
         Id apptId = BookingController.bookAppointment(
             doc.Id,
             Date.today().addDays(1),
-            Time.newInstance(17, 0, 0, 0),
+            '17:00',
             'Jane Doe',
             '9876543210'
         );
@@ -51,7 +51,7 @@ private class BookingControllerTest {
         Test.startTest();
         Boolean threw = false;
         try {
-            BookingController.bookAppointment(doc.Id, apptDate, Time.newInstance(17, 0, 0, 0), 'John', '9990001111');
+            BookingController.bookAppointment(doc.Id, apptDate, '17:00', 'John', '9990001111');
         } catch (AuraHandledException e) {
             threw = true;
             System.assertNotEquals(null, e.getMessage(), 'AuraHandledException message must survive the client boundary');

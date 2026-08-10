@@ -51,26 +51,15 @@ export default class QueueConsole extends LightningElement {
         }
     }
 
-    /**
-     * Apex Time on a plain @AuraEnabled wrapper (as opposed to a queried
-     * SObject field) serializes over the wire as milliseconds-since-midnight,
-     * not as an "HH:MM:SS.000Z" string, so it needs converting before display.
-     */
-    formatTime(rawTime) {
-        let totalSeconds;
-        if (typeof rawTime === 'number') {
-            totalSeconds = Math.floor(rawTime / 1000);
-        } else if (typeof rawTime === 'string') {
-            const [hh, mm, ss] = rawTime.split(':');
-            totalSeconds = parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseInt(ss || '0', 10);
-        } else {
-            return '';
-        }
-        const hour = Math.floor(totalSeconds / 3600) % 24;
-        const minute = Math.floor((totalSeconds % 3600) / 60);
+    // slotTime is a plain "HH:mm" string from Apex (see TimeUtils) -- Apex
+    // Time does not round-trip reliably across the wire, so it is never used
+    // directly in any @AuraEnabled signature.
+    formatTime(hhmm) {
+        const [hh, mm] = hhmm.split(':');
+        const hour = parseInt(hh, 10);
         const period = hour >= 12 ? 'PM' : 'AM';
         const displayHour = ((hour + 11) % 12) + 1;
-        return `${displayHour}:${String(minute).padStart(2, '0')} ${period}`;
+        return `${displayHour}:${mm} ${period}`;
     }
 
     connectedCallback() {
