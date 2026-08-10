@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Clinic Queue Admin</label>
+    <description>Reception/admin access to manage doctors, appointments, and the live queue console.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+
+    <objectPermissions>
+        <object>Doctor__c</object>
+        <allowCreate>true</allowCreate>
+        <allowRead>true</allowRead>
+        <allowEdit>true</allowEdit>
+        <allowDelete>true</allowDelete>
+        <viewAllRecords>true</viewAllRecords>
+        <modifyAllRecords>true</modifyAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <object>Appointment__c</object>
+        <allowCreate>true</allowCreate>
+        <allowRead>true</allowRead>
+        <allowEdit>true</allowEdit>
+        <allowDelete>true</allowDelete>
+        <viewAllRecords>true</viewAllRecords>
+        <modifyAllRecords>true</modifyAllRecords>
+    </objectPermissions>
+
+    <!--
+      Required fields (Clinic_Name__c, Start_Time__c, End_Time__c, Slot_Minutes__c,
+      Doctor__c, Patient_Name__c, Patient_Phone__c, Appointment_Date__c, Slot_Time__c,
+      Queue_Order__c, Status__c) are implicitly readable/editable once object-level
+      edit access is granted above. Salesforce rejects explicit FLS entries for
+      universally-required fields, so only the optional fields need one here.
+    -->
+    <fieldPermissions>
+        <field>Appointment__c.Checked_In_At__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Appointment__c.Checked_Out_At__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+
+    <classAccesses>
+        <apexClass>BookingController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>QueueController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+</PermissionSet>
