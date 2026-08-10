@@ -1,0 +1,71 @@
+<template>
+    <lightning-card title="Book an Appointment" icon-name="standard:events">
+        <div class="slds-p-horizontal_medium slds-p-bottom_small">
+            <template if:true={errorMessage}>
+                <div class="slds-text-color_error slds-p-bottom_small">{errorMessage}</div>
+            </template>
+            <template if:true={confirmation}>
+                <div class="slds-text-color_success slds-p-bottom_small">{confirmation}</div>
+            </template>
+
+            <div class="slds-grid slds-gutters slds-wrap slds-p-bottom_small">
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-combobox
+                        label="Doctor"
+                        value={selectedDoctorId}
+                        options={doctorOptions}
+                        onchange={handleDoctorChange}
+                    ></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-input
+                        type="date"
+                        label="Date"
+                        value={selectedDate}
+                        onchange={handleDateChange}
+                    ></lightning-input>
+                </div>
+            </div>
+
+            <template if:true={hasSlots}>
+                <p class="slds-text-title slds-p-bottom_xx-small">Available times</p>
+                <div class="slot-grid slds-p-bottom_x-small">
+                    <template for:each={slots} for:item="slot">
+                        <button
+                            key={slot.key}
+                            type="button"
+                            class={slot.className}
+                            data-value={slot.value}
+                            disabled={slot.disabled}
+                            onclick={handleSlotClick}
+                        >{slot.label}</button>
+                    </template>
+                </div>
+                <template if:true={selectedSlotLabel}>
+                    <p class="slds-p-bottom_medium slds-text-body_small">Selected: {selectedSlotLabel}</p>
+                </template>
+            </template>
+
+            <lightning-input
+                label="Patient Name"
+                value={patientName}
+                onchange={handleNameChange}
+                class="slds-p-bottom_small slds-p-top_small"
+            ></lightning-input>
+            <lightning-input
+                label="Patient Phone"
+                type="tel"
+                value={patientPhone}
+                onchange={handlePhoneChange}
+                class="slds-p-bottom_medium"
+            ></lightning-input>
+
+            <lightning-button
+                label="Book Appointment"
+                variant="brand"
+                disabled={isSubmitDisabled}
+                onclick={handleSubmit}
+            ></lightning-button>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,81 @@
+<template>
+    <lightning-card title="Live Queue" icon-name="standard:queue">
+        <div class="slds-p-horizontal_medium slds-p-bottom_small">
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-combobox
+                        label="Doctor"
+                        value={selectedDoctorId}
+                        options={doctorOptions}
+                        onchange={handleDoctorChange}
+                    ></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-input
+                        type="date"
+                        label="Date"
+                        value={selectedDate}
+                        onchange={handleDateChange}
+                    ></lightning-input>
+                </div>
+            </div>
+        </div>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Working" size="small"></lightning-spinner>
+        </template>
+
+        <template if:true={hasQueueItems}>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th scope="col">#</th>
+                        <th scope="col">Patient</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">Slot</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={queueItems} for:item="item">
+                        <tr key={item.id}>
+                            <td>{item.positionInQueue}</td>
+                            <td>{item.patientName}</td>
+                            <td>{item.patientPhone}</td>
+                            <td>{item.slotTime}</td>
+                            <td><span class={item.statusClass}>{item.status}</span></td>
+                            <td>
+                                <template if:true={item.isBooked}>
+                                    <lightning-button
+                                        label="Check In"
+                                        variant="brand"
+                                        data-id={item.id}
+                                        onclick={handleCheckIn}
+                                    ></lightning-button>
+                                    <lightning-button
+                                        label="Skip"
+                                        variant="destructive-text"
+                                        data-id={item.id}
+                                        onclick={handleSkip}
+                                    ></lightning-button>
+                                </template>
+                                <template if:true={item.isCheckedIn}>
+                                    <lightning-button
+                                        label="Check Out"
+                                        variant="success"
+                                        data-id={item.id}
+                                        onclick={handleCheckOut}
+                                    ></lightning-button>
+                                </template>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </template>
+        <template if:false={hasQueueItems}>
+            <p class="slds-p-around_medium slds-text-color_weak">No appointments for this doctor on this date.</p>
+        </template>
+    </lightning-card>
+</template>
