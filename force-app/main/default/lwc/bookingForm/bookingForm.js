@@ -37,18 +37,41 @@ export default class BookingForm extends LightningElement {
     wiredSlots(result) {
         this.wiredSlotsResult = result;
         if (result.data) {
-            this.slots = result.data.map((s) => ({
-                key: s.slotTime,
-                label: this.formatTime(s.slotTime),
-                value: s.slotTime,
-                disabled: !s.isAvailable,
-                className: s.isAvailable ? 'slot-btn' : 'slot-btn taken'
-            }));
+            this.slots = result.data.map((s) => {
+                const iso = this.toIsoTimeString(s.slotTime);
+                return {
+                    key: iso,
+                    label: this.formatTime(iso),
+                    value: iso,
+                    disabled: !s.isAvailable,
+                    className: s.isAvailable ? 'slot-btn' : 'slot-btn taken'
+                };
+            });
         }
     }
 
-    formatTime(t) {
-        const [hh, mm] = t.split(':');
+    /**
+     * Apex Time on a plain @AuraEnabled wrapper (as opposed to a queried
+     * SObject field) serializes over the wire as milliseconds-since-midnight,
+     * not as an "HH:MM:SS.000Z" string. Normalize to the string form so both
+     * display formatting and the value later sent back to bookAppointment
+     * (which expects an Apex Time-coercible string) are consistent.
+     */
+    toIsoTimeString(rawTime) {
+        if (typeof rawTime === 'number') {
+            const totalSeconds = Math.floor(rawTime / 1000);
+            const hh = Math.floor(totalSeconds / 3600);
+            const mm = Math.floor((totalSeconds % 3600) / 60);
+            const ss = totalSeconds % 60;
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${pad(hh)}:${pad(mm)}:${pad(ss)}.000Z`;
+        }
+        return rawTime;
+    }
+
+    formatTime(rawTime) {
+        const iso = this.toIsoTimeString(rawTime);
+        const [hh, mm] = iso.split(':');
         const hour = parseInt(hh, 10);
         const period = hour >= 12 ? 'PM' : 'AM';
         const displayHour = ((hour + 11) % 12) + 1;

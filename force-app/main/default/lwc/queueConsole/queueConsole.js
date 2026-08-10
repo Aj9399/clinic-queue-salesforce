@@ -41,6 +41,7 @@ export default class QueueConsole extends LightningElement {
         if (result.data) {
             this.queueItems = result.data.map((item) => ({
                 ...item,
+                slotTime: this.formatTime(item.slotTime),
                 isBooked: item.status === 'Booked',
                 isCheckedIn: item.status === 'Checked In',
                 statusClass: `badge badge-${item.status.replace(' ', '-').toLowerCase()}`
@@ -48,6 +49,28 @@ export default class QueueConsole extends LightningElement {
         } else if (result.error) {
             this.notifyError('Could not load queue', result.error);
         }
+    }
+
+    /**
+     * Apex Time on a plain @AuraEnabled wrapper (as opposed to a queried
+     * SObject field) serializes over the wire as milliseconds-since-midnight,
+     * not as an "HH:MM:SS.000Z" string, so it needs converting before display.
+     */
+    formatTime(rawTime) {
+        let totalSeconds;
+        if (typeof rawTime === 'number') {
+            totalSeconds = Math.floor(rawTime / 1000);
+        } else if (typeof rawTime === 'string') {
+            const [hh, mm, ss] = rawTime.split(':');
+            totalSeconds = parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseInt(ss || '0', 10);
+        } else {
+            return '';
+        }
+        const hour = Math.floor(totalSeconds / 3600) % 24;
+        const minute = Math.floor((totalSeconds % 3600) / 60);
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = ((hour + 11) % 12) + 1;
+        return `${displayHour}:${String(minute).padStart(2, '0')} ${period}`;
     }
 
     connectedCallback() {
