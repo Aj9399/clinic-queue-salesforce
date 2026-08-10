@@ -38,11 +38,14 @@ export default class BookingForm extends LightningElement {
         this.wiredSlotsResult = result;
         if (result.data) {
             this.slots = result.data.map((s) => {
-                const iso = this.toIsoTimeString(s.slotTime);
+                // Stash the raw wire value (milliseconds-since-midnight number) as
+                // a string, since HTML data-* attributes can only hold strings.
+                // It gets converted back to a Number before being sent to Apex.
+                const rawValue = String(s.slotTime);
                 return {
-                    key: iso,
-                    label: this.formatTime(iso),
-                    value: iso,
+                    key: rawValue,
+                    label: this.formatTime(s.slotTime),
+                    value: rawValue,
                     disabled: !s.isAvailable,
                     className: s.isAvailable ? 'slot-btn' : 'slot-btn taken'
                 };
@@ -53,29 +56,32 @@ export default class BookingForm extends LightningElement {
     /**
      * Apex Time on a plain @AuraEnabled wrapper (as opposed to a queried
      * SObject field) serializes over the wire as milliseconds-since-midnight,
-     * not as an "HH:MM:SS.000Z" string. Normalize to the string form so both
-     * display formatting and the value later sent back to bookAppointment
-     * (which expects an Apex Time-coercible string) are consistent.
+     * and the same numeric form is what bookAppointment's Time parameter
+     * expects back -- an "HH:MM:SS.000Z" string is rejected. This normalizes
+     * any of number / digit-string / colon-string form into total seconds for
+     * display purposes only.
      */
-    toIsoTimeString(rawTime) {
+    toTotalSeconds(rawTime) {
         if (typeof rawTime === 'number') {
-            const totalSeconds = Math.floor(rawTime / 1000);
-            const hh = Math.floor(totalSeconds / 3600);
-            const mm = Math.floor((totalSeconds % 3600) / 60);
-            const ss = totalSeconds % 60;
-            const pad = (n) => String(n).padStart(2, '0');
-            return `${pad(hh)}:${pad(mm)}:${pad(ss)}.000Z`;
+            return Math.floor(rawTime / 1000);
         }
-        return rawTime;
+        if (typeof rawTime === 'string' && /^\d+$/.test(rawTime)) {
+            return Math.floor(Number(rawTime) / 1000);
+        }
+        if (typeof rawTime === 'string' && rawTime.includes(':')) {
+            const [hh, mm, ss] = rawTime.split(':');
+            return parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseInt(ss || '0', 10);
+        }
+        return 0;
     }
 
     formatTime(rawTime) {
-        const iso = this.toIsoTimeString(rawTime);
-        const [hh, mm] = iso.split(':');
-        const hour = parseInt(hh, 10);
+        const totalSeconds = this.toTotalSeconds(rawTime);
+        const hour = Math.floor(totalSeconds / 3600) % 24;
+        const minute = Math.floor((totalSeconds % 3600) / 60);
         const period = hour >= 12 ? 'PM' : 'AM';
         const displayHour = ((hour + 11) % 12) + 1;
-        return `${displayHour}:${mm} ${period}`;
+        return `${displayHour}:${String(minute).padStart(2, '0')} ${period}`;
     }
 
     handleDoctorChange(event) {
@@ -116,10 +122,11 @@ export default class BookingForm extends LightningElement {
         this.errorMessage = undefined;
         this.isLoading = true;
         try {
+            const slotTimeParam = /^\d+$/.test(this.selectedSlot) ? Number(this.selectedSlot) : this.selectedSlot;
             await bookAppointment({
                 doctorId: this.selectedDoctorId,
                 apptDate: this.selectedDate,
-                slotTime: this.selectedSlot,
+                slotTime: slotTimeParam,
                 patientName: this.patientName,
                 patientPhone: this.patientPhone
             });
