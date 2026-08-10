@@ -1,0 +1,26 @@
+<template>
+    <div class="container">
+        <template if:true={noAppointmentId}>
+            <p class="muted">No appointment reference found in this link.</p>
+        </template>
+
+        <template if:true={errorMessage}>
+            <p class="error-text">{errorMessage}</p>
+        </template>
+
+        <template if:true={hasStatus}>
+            <div class="card">
+                <h1>{status.patientName}</h1>
+                <p class="muted">Slot time: {formattedSlotTime}</p>
+                <span class="badge">{status.status}</span>
+
+                <template if:true={hasPosition}>
+                    <div class="position-line">
+                        <span class="position-number">{status.positionInQueue}</span>
+                        <span class="muted">patient(s) including you currently in line</span>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

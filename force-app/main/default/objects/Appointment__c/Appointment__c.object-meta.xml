@@ -8,5 +8,6 @@
         <type>AutoNumber</type>
     </nameField>
     <deploymentStatus>Deployed</deploymentStatus>
+    <externalSharingModel>Private</externalSharingModel>
     <sharingModel>ReadWrite</sharingModel>
 </CustomObject>

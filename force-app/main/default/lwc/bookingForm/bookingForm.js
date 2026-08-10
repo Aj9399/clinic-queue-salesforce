@@ -14,6 +14,7 @@ export default class BookingForm extends LightningElement {
     patientPhone = '';
     isLoading = false;
     confirmation;
+    confirmedAppointmentId;
     errorMessage;
 
     wiredSlotsResult;
@@ -96,13 +97,14 @@ export default class BookingForm extends LightningElement {
         this.errorMessage = undefined;
         this.isLoading = true;
         try {
-            await bookAppointment({
+            const newAppointmentId = await bookAppointment({
                 doctorId: this.selectedDoctorId,
                 apptDate: this.selectedDate,
                 slotTime: this.selectedSlot,
                 patientName: this.patientName,
                 patientPhone: this.patientPhone
             });
+            this.confirmedAppointmentId = newAppointmentId;
             this.confirmation = `Booked for ${this.formatTime(this.selectedSlot)} on ${this.selectedDate}.`;
             this.patientName = '';
             this.patientPhone = '';

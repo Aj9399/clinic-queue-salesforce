@@ -5,7 +5,10 @@
                 <div class="slds-text-color_error slds-p-bottom_small">{errorMessage}</div>
             </template>
             <template if:true={confirmation}>
-                <div class="slds-text-color_success slds-p-bottom_small">{confirmation}</div>
+                <div class="slds-text-color_success slds-p-bottom_small">
+                    <p>{confirmation}</p>
+                    <p class="slds-text-body_small">Reference: {confirmedAppointmentId}</p>
+                </div>
             </template>
 
             <div class="slds-grid slds-gutters slds-wrap slds-p-bottom_small">

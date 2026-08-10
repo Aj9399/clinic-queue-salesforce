@@ -6,8 +6,15 @@
  *
  * Slot times cross the @AuraEnabled boundary as "HH:mm" strings, not Apex
  * Time -- see TimeUtils for why.
+ *
+ * Deliberately "without sharing": guest users booking from the public site
+ * have no row-level visibility into Appointment__c (external sharing model
+ * is Private, see Appointment__c.object-meta.xml), so a with-sharing class
+ * would silently see zero existing bookings and let every guest double-book
+ * every slot. Safe here because nothing returned to the client is
+ * patient-identifying -- getAvailableSlots only exposes a time + boolean.
  */
-public with sharing class BookingService {
+public without sharing class BookingService {
     public class SlotOption {
         @AuraEnabled
         public String slotTime;
