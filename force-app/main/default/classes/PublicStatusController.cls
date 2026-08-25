@@ -5,7 +5,14 @@
  * every patient's name and phone number for a doctor's whole day.
  */
 public with sharing class PublicStatusController {
-    @AuraEnabled(cacheable=true)
+    // Deliberately NOT cacheable=true. This is called imperatively on a
+    // 6-second poll loop (see patientStatus.js) -- cacheable=true would make
+    // the Lightning Data Service serve every subsequent poll with the same
+    // appointmentId from its client-side cache instead of ever hitting the
+    // server again, which is exactly what was silently happening: the poll
+    // "fired" in JS but never produced a real network call, and the page
+    // stayed frozen on stale data indefinitely.
+    @AuraEnabled
     public static PublicStatusService.StatusResult getStatus(Id appointmentId) {
         try {
             return PublicStatusService.getStatus(appointmentId);
