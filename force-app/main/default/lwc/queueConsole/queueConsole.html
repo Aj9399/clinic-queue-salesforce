@@ -1,8 +1,23 @@
 <template>
-    <lightning-card title="Live Queue" icon-name="standard:queue">
-        <div class="slds-p-horizontal_medium slds-p-bottom_small">
-            <div class="slds-grid slds-gutters slds-wrap">
-                <div class="slds-col slds-size_1-of-2">
+    <div class="cq-page">
+        <div class="cq-card">
+            <div class="cq-header">
+                <div class="cq-header-left">
+                    <div class="cq-header-icon">
+                        <lightning-icon icon-name="standard:queue" size="small" variant="inverse"></lightning-icon>
+                    </div>
+                    <div>
+                        <h1 class="cq-title">Live Queue</h1>
+                        <p class="cq-subtitle">
+                            <span class="cq-live-dot"></span>
+                            Updates in real time
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cq-filters">
+                <div class="cq-field">
                     <lightning-combobox
                         label="Doctor"
                         value={selectedDoctorId}
@@ -10,7 +25,7 @@
                         onchange={handleDoctorChange}
                     ></lightning-combobox>
                 </div>
-                <div class="slds-col slds-size_1-of-2">
+                <div class="cq-field">
                     <lightning-input
                         type="date"
                         label="Date"
@@ -19,63 +34,40 @@
                     ></lightning-input>
                 </div>
             </div>
-        </div>
 
-        <template if:true={isLoading}>
-            <lightning-spinner alternative-text="Working" size="small"></lightning-spinner>
-        </template>
+            <template if:true={isLoading}>
+                <div class="cq-loading-bar"></div>
+            </template>
 
-        <template if:true={hasQueueItems}>
-            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
-                <thead>
-                    <tr class="slds-line-height_reset">
-                        <th scope="col">#</th>
-                        <th scope="col">Patient</th>
-                        <th scope="col">Phone</th>
-                        <th scope="col">Slot</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <template if:true={hasQueueItems}>
+                <div class="cq-queue-list">
                     <template for:each={queueItems} for:item="item">
-                        <tr key={item.id}>
-                            <td>{item.positionInQueue}</td>
-                            <td>{item.patientName}</td>
-                            <td>{item.patientPhone}</td>
-                            <td>{item.slotTime}</td>
-                            <td><span class={item.statusClass}>{item.status}</span></td>
-                            <td>
+                        <div key={item.id} class={item.rowClass}>
+                            <div class="cq-position">{item.positionInQueue}</div>
+                            <div class="cq-patient-info">
+                                <p class="cq-patient-name">{item.patientName}</p>
+                                <p class="cq-patient-meta">{item.patientPhone} &middot; Slot {item.slotTime}</p>
+                            </div>
+                            <span class={item.statusClass}>{item.status}</span>
+                            <div class="cq-actions">
                                 <template if:true={item.isBooked}>
-                                    <lightning-button
-                                        label="Check In"
-                                        variant="brand"
-                                        data-id={item.id}
-                                        onclick={handleCheckIn}
-                                    ></lightning-button>
-                                    <lightning-button
-                                        label="Skip"
-                                        variant="destructive-text"
-                                        data-id={item.id}
-                                        onclick={handleSkip}
-                                    ></lightning-button>
+                                    <button type="button" class="cq-btn cq-btn-primary" data-id={item.id} onclick={handleCheckIn}>Check In</button>
+                                    <button type="button" class="cq-btn cq-btn-ghost-danger" data-id={item.id} onclick={handleSkip}>Skip</button>
                                 </template>
                                 <template if:true={item.isCheckedIn}>
-                                    <lightning-button
-                                        label="Check Out"
-                                        variant="success"
-                                        data-id={item.id}
-                                        onclick={handleCheckOut}
-                                    ></lightning-button>
+                                    <button type="button" class="cq-btn cq-btn-success" data-id={item.id} onclick={handleCheckOut}>Check Out</button>
                                 </template>
-                            </td>
-                        </tr>
+                            </div>
+                        </div>
                     </template>
-                </tbody>
-            </table>
-        </template>
-        <template if:false={hasQueueItems}>
-            <p class="slds-p-around_medium slds-text-color_weak">No appointments for this doctor on this date.</p>
-        </template>
-    </lightning-card>
+                </div>
+            </template>
+            <template if:false={hasQueueItems}>
+                <div class="cq-empty">
+                    <lightning-icon icon-name="utility:date_time" size="small" class="cq-empty-icon"></lightning-icon>
+                    <p>No appointments for this doctor on this date.</p>
+                </div>
+            </template>
+        </div>
+    </div>
 </template>

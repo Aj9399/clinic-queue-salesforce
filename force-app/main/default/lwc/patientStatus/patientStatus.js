@@ -70,4 +70,9 @@ export default class PatientStatus extends LightningElement {
     get noAppointmentId() {
         return !this.appointmentId;
     }
+
+    get statusBadgeClass() {
+        const key = (this.status && this.status.status ? this.status.status : '').replace(' ', '-').toLowerCase();
+        return `cq-badge cq-badge-${key}`;
+    }
 }

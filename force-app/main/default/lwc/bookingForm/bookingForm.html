@@ -1,74 +1,112 @@
 <template>
-    <lightning-card title="Book an Appointment" icon-name="standard:events">
-        <div class="slds-p-horizontal_medium slds-p-bottom_small">
-            <template if:true={errorMessage}>
-                <div class="slds-text-color_error slds-p-bottom_small">{errorMessage}</div>
-            </template>
-            <template if:true={confirmation}>
-                <div class="slds-text-color_success slds-p-bottom_small">
-                    <p>{confirmation}</p>
-                    <p class="slds-text-body_small">Reference: {confirmedAppointmentId}</p>
+    <div class="cq-page">
+        <div class="cq-card">
+            <div class="cq-header">
+                <div class="cq-header-icon">
+                    <lightning-icon icon-name="standard:events" size="small" variant="inverse"></lightning-icon>
                 </div>
-            </template>
-
-            <div class="slds-grid slds-gutters slds-wrap slds-p-bottom_small">
-                <div class="slds-col slds-size_1-of-2">
-                    <lightning-combobox
-                        label="Doctor"
-                        value={selectedDoctorId}
-                        options={doctorOptions}
-                        onchange={handleDoctorChange}
-                    ></lightning-combobox>
-                </div>
-                <div class="slds-col slds-size_1-of-2">
-                    <lightning-input
-                        type="date"
-                        label="Date"
-                        value={selectedDate}
-                        onchange={handleDateChange}
-                    ></lightning-input>
+                <div>
+                    <h1 class="cq-title">Book an Appointment</h1>
+                    <p class="cq-subtitle">Pick a doctor, date, and open slot</p>
                 </div>
             </div>
 
-            <template if:true={hasSlots}>
-                <p class="slds-text-title slds-p-bottom_xx-small">Available times</p>
-                <div class="slot-grid slds-p-bottom_x-small">
-                    <template for:each={slots} for:item="slot">
-                        <button
-                            key={slot.key}
-                            type="button"
-                            class={slot.className}
-                            data-value={slot.value}
-                            disabled={slot.disabled}
-                            onclick={handleSlotClick}
-                        >{slot.label}</button>
-                    </template>
-                </div>
-                <template if:true={selectedSlotLabel}>
-                    <p class="slds-p-bottom_medium slds-text-body_small">Selected: {selectedSlotLabel}</p>
+            <div class="cq-body">
+                <template if:true={errorMessage}>
+                    <div class="cq-alert cq-alert-error">
+                        <lightning-icon icon-name="utility:error" size="x-small" variant="error"></lightning-icon>
+                        <span>{errorMessage}</span>
+                    </div>
                 </template>
-            </template>
 
-            <lightning-input
-                label="Patient Name"
-                value={patientName}
-                onchange={handleNameChange}
-                class="slds-p-bottom_small slds-p-top_small"
-            ></lightning-input>
-            <lightning-input
-                label="Patient Phone"
-                type="tel"
-                value={patientPhone}
-                onchange={handlePhoneChange}
-                class="slds-p-bottom_medium"
-            ></lightning-input>
+                <template if:true={confirmation}>
+                    <div class="cq-alert cq-alert-success">
+                        <lightning-icon icon-name="utility:success" size="x-small" variant="success"></lightning-icon>
+                        <div>
+                            <p class="cq-alert-title">{confirmation}</p>
+                            <p class="cq-alert-ref">Reference: <span class="cq-mono">{confirmedAppointmentId}</span></p>
+                        </div>
+                    </div>
+                </template>
 
-            <lightning-button
-                label="Book Appointment"
-                variant="brand"
-                disabled={isSubmitDisabled}
-                onclick={handleSubmit}
-            ></lightning-button>
+                <div class="cq-field-row">
+                    <div class="cq-field">
+                        <lightning-combobox
+                            label="Doctor"
+                            value={selectedDoctorId}
+                            options={doctorOptions}
+                            onchange={handleDoctorChange}
+                        ></lightning-combobox>
+                    </div>
+                    <div class="cq-field">
+                        <lightning-input
+                            type="date"
+                            label="Date"
+                            value={selectedDate}
+                            onchange={handleDateChange}
+                        ></lightning-input>
+                    </div>
+                </div>
+
+                <template if:true={hasSlots}>
+                    <p class="cq-section-label">Available times</p>
+                    <div class="cq-slot-grid">
+                        <template for:each={slots} for:item="slot">
+                            <button
+                                key={slot.key}
+                                type="button"
+                                class={slot.className}
+                                data-value={slot.value}
+                                disabled={slot.disabled}
+                                onclick={handleSlotClick}
+                            >{slot.label}</button>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasSlots}>
+                    <p class="cq-empty-inline">No open slots for this doctor on this date.</p>
+                </template>
+
+                <template if:true={selectedSlotLabel}>
+                    <div class="cq-selected-chip">
+                        <lightning-icon icon-name="utility:clock" size="xx-small"></lightning-icon>
+                        <span>Selected: <strong>{selectedSlotLabel}</strong></span>
+                    </div>
+                </template>
+
+                <div class="cq-divider"></div>
+
+                <p class="cq-section-label">Your details</p>
+                <div class="cq-field-row">
+                    <div class="cq-field">
+                        <lightning-input
+                            label="Patient Name"
+                            value={patientName}
+                            onchange={handleNameChange}
+                        ></lightning-input>
+                    </div>
+                    <div class="cq-field">
+                        <lightning-input
+                            label="Patient Phone"
+                            type="tel"
+                            value={patientPhone}
+                            onchange={handlePhoneChange}
+                        ></lightning-input>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="cq-submit-btn"
+                    disabled={isSubmitDisabled}
+                    onclick={handleSubmit}
+                >
+                    <template if:true={isLoading}>
+                        <lightning-spinner alternative-text="Booking" size="x-small" variant="inverse"></lightning-spinner>
+                    </template>
+                    <template if:false={isLoading}>Book Appointment</template>
+                </button>
+            </div>
         </div>
-    </lightning-card>
+    </div>
 </template>

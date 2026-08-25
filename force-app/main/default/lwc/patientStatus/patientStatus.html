@@ -1,26 +1,45 @@
 <template>
-    <div class="container">
-        <template if:true={noAppointmentId}>
-            <p class="muted">No appointment reference found in this link.</p>
-        </template>
+    <div class="cq-page">
+        <div class="cq-card">
+            <div class="cq-header">
+                <div class="cq-header-icon">
+                    <lightning-icon icon-name="standard:appointment" size="small" variant="inverse"></lightning-icon>
+                </div>
+                <div>
+                    <h1 class="cq-title">Your Appointment</h1>
+                    <p class="cq-subtitle">
+                        <span class="cq-live-dot"></span>
+                        Live status
+                    </p>
+                </div>
+            </div>
 
-        <template if:true={errorMessage}>
-            <p class="error-text">{errorMessage}</p>
-        </template>
+            <div class="cq-body">
+                <template if:true={noAppointmentId}>
+                    <p class="cq-muted">No appointment reference found in this link.</p>
+                </template>
 
-        <template if:true={hasStatus}>
-            <div class="card">
-                <h1>{status.patientName}</h1>
-                <p class="muted">Slot time: {formattedSlotTime}</p>
-                <span class="badge">{status.status}</span>
+                <template if:true={errorMessage}>
+                    <div class="cq-alert-error">{errorMessage}</div>
+                </template>
 
-                <template if:true={hasPosition}>
-                    <div class="position-line">
-                        <span class="position-number">{status.positionInQueue}</span>
-                        <span class="muted">patient(s) including you currently in line</span>
-                    </div>
+                <template if:true={hasStatus}>
+                    <p class="cq-patient-name">{status.patientName}</p>
+                    <p class="cq-slot-line">Slot time: <strong>{formattedSlotTime}</strong></p>
+                    <span class={statusBadgeClass}>{status.status}</span>
+
+                    <template if:true={hasPosition}>
+                        <div class="cq-position-hero">
+                            <div class="cq-position-number">{status.positionInQueue}</div>
+                            <p class="cq-position-caption">patient(s) including you currently in line</p>
+                        </div>
+                    </template>
+
+                    <template if:false={hasPosition}>
+                        <p class="cq-muted cq-done-note">This appointment is no longer active in the queue.</p>
+                    </template>
                 </template>
             </div>
-        </template>
+        </div>
     </div>
 </template>

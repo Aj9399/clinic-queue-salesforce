@@ -8,7 +8,7 @@ export default class BookingForm extends LightningElement {
     doctorOptions = [];
     selectedDoctorId;
     selectedDate = new Date().toISOString().slice(0, 10);
-    slots = [];
+    rawSlots = [];
     selectedSlot;
     patientName = '';
     patientPhone = '';
@@ -41,14 +41,25 @@ export default class BookingForm extends LightningElement {
             // slotTime is a plain "HH:mm" string from Apex (see TimeUtils) --
             // Apex Time does not round-trip reliably across the wire, so it is
             // never used directly in any @AuraEnabled signature.
-            this.slots = result.data.map((s) => ({
+            this.rawSlots = result.data.map((s) => ({
                 key: s.slotTime,
                 label: this.formatTime(s.slotTime),
                 value: s.slotTime,
-                disabled: !s.isAvailable,
-                className: s.isAvailable ? 'slot-btn' : 'slot-btn taken'
+                disabled: !s.isAvailable
             }));
         }
+    }
+
+    get slots() {
+        return this.rawSlots.map((s) => {
+            let className = 'cq-slot-btn';
+            if (s.disabled) {
+                className += ' taken';
+            } else if (s.value === this.selectedSlot) {
+                className += ' selected';
+            }
+            return { ...s, className };
+        });
     }
 
     formatTime(hhmm) {

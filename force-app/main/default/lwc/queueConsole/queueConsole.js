@@ -44,11 +44,19 @@ export default class QueueConsole extends LightningElement {
                 slotTime: this.formatTime(item.slotTime),
                 isBooked: item.status === 'Booked',
                 isCheckedIn: item.status === 'Checked In',
-                statusClass: `badge badge-${item.status.replace(' ', '-').toLowerCase()}`
+                statusClass: `badge badge-${item.status.replace(' ', '-').toLowerCase()}`,
+                rowClass: this.rowClassFor(item.status)
             }));
         } else if (result.error) {
             this.notifyError('Could not load queue', result.error);
         }
+    }
+
+    rowClassFor(status) {
+        if (status === 'Checked In') return 'cq-row cq-row-checked-in';
+        if (status === 'Completed') return 'cq-row cq-row-completed';
+        if (status === 'Skipped' || status === 'Cancelled') return 'cq-row cq-row-inactive';
+        return 'cq-row';
     }
 
     // slotTime is a plain "HH:mm" string from Apex (see TimeUtils) -- Apex
