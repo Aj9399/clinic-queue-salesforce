@@ -42,7 +42,7 @@
             <template if:true={hasQueueItems}>
                 <div class="cq-queue-list">
                     <template for:each={queueItems} for:item="item">
-                        <div key={item.id} class={item.rowClass}>
+                        <div key={item.id} class={item.rowClass} style={item.rowStyle}>
                             <div class="cq-position">{item.positionInQueue}</div>
                             <div class="cq-patient-info">
                                 <p class="cq-patient-name">{item.patientName}</p>

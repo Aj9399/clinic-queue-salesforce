@@ -4,12 +4,15 @@ import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import getStatus from '@salesforce/apex/PublicStatusController.getStatus';
 
 const CHANNEL = '/event/Queue_Update__e';
+const POLL_INTERVAL_MS = 6000;
+const TERMINAL_STATUSES = new Set(['Completed', 'Cancelled']);
 
 export default class PatientStatus extends LightningElement {
     appointmentId;
     status;
     errorMessage;
     subscription;
+    pollTimer;
 
     @wire(CurrentPageReference)
     getPageReference(pageRef) {
@@ -21,6 +24,11 @@ export default class PatientStatus extends LightningElement {
     }
 
     connectedCallback() {
+        // CometD/empApi support for anonymous Experience Cloud guest sessions
+        // is inconsistent across orgs regardless of the guest profile's API
+        // Enabled setting, so this page cannot rely on it alone. Polling is
+        // the reliable path for a guest-facing status check; empApi is kept
+        // as a bonus for a faster update on orgs where it does work.
         subscribe(CHANNEL, -1, () => this.loadStatus()).then((sub) => {
             this.subscription = sub;
         });
@@ -28,11 +36,15 @@ export default class PatientStatus extends LightningElement {
             // eslint-disable-next-line no-console
             console.error('empApi streaming error', JSON.stringify(error));
         });
+        this.pollTimer = setInterval(() => this.loadStatus(), POLL_INTERVAL_MS);
     }
 
     disconnectedCallback() {
         if (this.subscription) {
             unsubscribe(this.subscription);
+        }
+        if (this.pollTimer) {
+            clearInterval(this.pollTimer);
         }
     }
 
@@ -43,6 +55,10 @@ export default class PatientStatus extends LightningElement {
         try {
             this.status = await getStatus({ appointmentId: this.appointmentId });
             this.errorMessage = undefined;
+            if (this.pollTimer && TERMINAL_STATUSES.has(this.status.status)) {
+                clearInterval(this.pollTimer);
+                this.pollTimer = undefined;
+            }
         } catch (error) {
             this.errorMessage = (error && error.body && error.body.message) || 'Could not load status.';
         }

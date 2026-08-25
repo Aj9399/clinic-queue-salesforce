@@ -45,7 +45,10 @@ export default class QueueConsole extends LightningElement {
                 isBooked: item.status === 'Booked',
                 isCheckedIn: item.status === 'Checked In',
                 statusClass: `badge badge-${item.status.replace(' ', '-').toLowerCase()}`,
-                rowClass: this.rowClassFor(item.status)
+                rowClass: this.rowClassFor(item.status),
+                // Inline style as a belt-and-suspenders backstop alongside the
+                // row class, in case of any CSS cascade surprises.
+                rowStyle: this.rowStyleFor(item.status)
             }));
         } else if (result.error) {
             this.notifyError('Could not load queue', result.error);
@@ -57,6 +60,13 @@ export default class QueueConsole extends LightningElement {
         if (status === 'Completed') return 'cq-row cq-row-completed';
         if (status === 'Skipped' || status === 'Cancelled') return 'cq-row cq-row-inactive';
         return 'cq-row';
+    }
+
+    rowStyleFor(status) {
+        if (status === 'Completed' || status === 'Skipped' || status === 'Cancelled') {
+            return 'opacity:0.55;';
+        }
+        return '';
     }
 
     // slotTime is a plain "HH:mm" string from Apex (see TimeUtils) -- Apex
@@ -130,8 +140,28 @@ export default class QueueConsole extends LightningElement {
     }
 
     notifyError(title, error) {
-        const message = (error && error.body && error.body.message) || (error && error.message) || 'Unknown error';
-        this.dispatchEvent(new ShowToastEvent({ title, message, variant: 'error' }));
+        this.dispatchEvent(new ShowToastEvent({ title, message: this.extractErrorMessage(error), variant: 'error' }));
+    }
+
+    // See bookingForm.js for why this handles multiple shapes instead of
+    // assuming error.body.message.
+    extractErrorMessage(error) {
+        const body = error && error.body;
+        if (body) {
+            if (typeof body.message === 'string' && body.message) {
+                return body.message;
+            }
+            if (Array.isArray(body) && body.length > 0 && body[0].message) {
+                return body[0].message;
+            }
+            if (Array.isArray(body.pageErrors) && body.pageErrors.length > 0 && body.pageErrors[0].message) {
+                return body.pageErrors[0].message;
+            }
+        }
+        if (error && typeof error.message === 'string' && error.message) {
+            return error.message;
+        }
+        return 'Unknown error';
     }
 
     get hasQueueItems() {

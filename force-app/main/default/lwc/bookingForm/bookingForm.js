@@ -53,12 +53,16 @@ export default class BookingForm extends LightningElement {
     get slots() {
         return this.rawSlots.map((s) => {
             let className = 'cq-slot-btn';
+            let style = '';
             if (s.disabled) {
                 className += ' taken';
             } else if (s.value === this.selectedSlot) {
                 className += ' selected';
+                // Inline style as a belt-and-suspenders backstop alongside the
+                // .selected class, in case of any CSS cascade surprises.
+                style = 'background:#0f766e;border-color:#0f766e;color:#ffffff;';
             }
-            return { ...s, className };
+            return { ...s, className, style };
         });
     }
 
@@ -104,6 +108,31 @@ export default class BookingForm extends LightningElement {
         return this.slots && this.slots.length > 0;
     }
 
+    // Apex/Aura errors from an imperative call do not have one consistent
+    // shape: AuraHandledException usually surfaces as error.body.message,
+    // but validation-style and some other error paths surface as
+    // error.body being an array of {message} objects, or a pageErrors
+    // array, instead. Handle all of them rather than assuming the happy
+    // shape and silently showing nothing when it differs.
+    extractErrorMessage(error) {
+        const body = error && error.body;
+        if (body) {
+            if (typeof body.message === 'string' && body.message) {
+                return body.message;
+            }
+            if (Array.isArray(body) && body.length > 0 && body[0].message) {
+                return body[0].message;
+            }
+            if (Array.isArray(body.pageErrors) && body.pageErrors.length > 0 && body.pageErrors[0].message) {
+                return body.pageErrors[0].message;
+            }
+        }
+        if (error && typeof error.message === 'string' && error.message) {
+            return error.message;
+        }
+        return 'Could not book that slot. Please try again.';
+    }
+
     async handleSubmit() {
         this.errorMessage = undefined;
         this.isLoading = true;
@@ -122,7 +151,7 @@ export default class BookingForm extends LightningElement {
             this.selectedSlot = undefined;
             await refreshApex(this.wiredSlotsResult);
         } catch (error) {
-            this.errorMessage = (error && error.body && error.body.message) || 'Could not book that slot.';
+            this.errorMessage = this.extractErrorMessage(error);
         } finally {
             this.isLoading = false;
         }
