@@ -63,6 +63,13 @@ public without sharing class BookingService {
         if (String.isBlank(patientName) || String.isBlank(patientPhone)) {
             throw new QueueService.QueueException('Patient name and phone are required.');
         }
+        // Guards against single-character junk (seen in testing: phone "a").
+        // 7 digits is a deliberately low bar -- just enough to reject garbage
+        // without assuming any particular country's phone number format.
+        Integer digitCount = patientPhone.replaceAll('[^0-9]', '').length();
+        if (digitCount < 7) {
+            throw new QueueService.QueueException('Please enter a valid phone number.');
+        }
         if (String.isBlank(slotTimeStr)) {
             throw new QueueService.QueueException('A slot time is required.');
         }

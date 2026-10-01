@@ -152,6 +152,12 @@ export default class BookingForm extends LightningElement {
             await refreshApex(this.wiredSlotsResult);
         } catch (error) {
             this.errorMessage = this.extractErrorMessage(error);
+            // The failed slot is very likely no longer available (that's
+            // usually why the booking failed) -- clear the stale selection
+            // and pull fresh availability so the grid agrees with the error
+            // instead of still showing the contested slot as selectable.
+            this.selectedSlot = undefined;
+            await refreshApex(this.wiredSlotsResult);
         } finally {
             this.isLoading = false;
         }

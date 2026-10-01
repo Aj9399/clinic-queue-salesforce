@@ -31,7 +31,8 @@
                     <template if:true={hasPosition}>
                         <div class="cq-position-hero">
                             <div class="cq-position-number">{status.positionInQueue}</div>
-                            <p class="cq-position-caption">patient(s) including you currently in line</p>
+                            <p class="cq-position-caption">Your position in line</p>
+                            <p class="cq-ahead-line">{aheadLine}</p>
                         </div>
                     </template>
 

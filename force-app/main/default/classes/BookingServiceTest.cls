@@ -93,4 +93,21 @@ private class BookingServiceTest {
 
         System.assert(threw, 'Expected booking with a blank patient name to throw');
     }
+
+    @isTest
+    static void testBookAppointmentRejectsTooShortPhone() {
+        Doctor__c doc = [SELECT Id FROM Doctor__c LIMIT 1];
+        Date apptDate = Date.today().addDays(1);
+
+        Test.startTest();
+        Boolean threw = false;
+        try {
+            BookingService.bookAppointment(doc.Id, apptDate, '17:00', 'Jane Doe', 'a');
+        } catch (QueueService.QueueException e) {
+            threw = true;
+        }
+        Test.stopTest();
+
+        System.assert(threw, 'Expected booking with a single-character phone value to throw');
+    }
 }

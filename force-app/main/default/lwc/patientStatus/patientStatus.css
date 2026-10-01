@@ -171,6 +171,13 @@
     color: var(--cq-text-muted);
 }
 
+.cq-ahead-line {
+    margin: 4px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cq-primary-dark);
+}
+
 .cq-done-note {
     margin-top: 16px;
 }

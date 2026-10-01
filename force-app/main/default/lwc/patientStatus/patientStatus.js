@@ -91,4 +91,20 @@ export default class PatientStatus extends LightningElement {
         const key = (this.status && this.status.status ? this.status.status : '').replace(' ', '-').toLowerCase();
         return `cq-badge cq-badge-${key}`;
     }
+
+    // positionInQueue is this patient's own place in line, not the total
+    // number of people waiting (bug: the old caption "N patient(s)
+    // including you currently in line" read as a headcount, which it is
+    // not -- there may be more patients behind this one who were never
+    // counted). Spell out what the number actually means instead.
+    get aheadLine() {
+        if (!this.hasPosition) {
+            return '';
+        }
+        const ahead = this.status.positionInQueue - 1;
+        if (ahead <= 0) {
+            return "You're next";
+        }
+        return `${ahead} patient${ahead === 1 ? '' : 's'} ahead of you`;
+    }
 }
